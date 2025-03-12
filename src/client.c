@@ -6,7 +6,7 @@
 /*   By: obajja <obajja@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:58:53 by obajja            #+#    #+#             */
-/*   Updated: 2025/03/12 12:51:10 by obajja           ###   ########.fr       */
+/*   Updated: 2025/03/12 22:02:14 by obajja           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,22 +41,10 @@ int	ft_atoi(const char *str)
 
 void	listener(int sig)
 {
-	if (sig == SIGUSR1)
-		return ;
-	else if (sig == SIGUSR2)
+	if (sig == SIGUSR2)
 		exit(1);
 }
 
-void	confirmation(void)
-{
-	struct sigaction	ear;
-
-	sigemptyset(&ear.sa_mask);
-	ear.sa_handler = listener;
-	ear.sa_flags = SA_SIGINFO;
-	sigaction(SIGUSR1, &ear, NULL);
-	sigaction(SIGUSR2, &ear, NULL);
-}
 void	end_printer(int PID)
 {
 	int		byte;
@@ -72,9 +60,7 @@ void	end_printer(int PID)
 			kill(PID, SIGUSR1);
 		if (encoded == 1)
 			kill(PID, SIGUSR2);
-		confirmation();
 		pause();
-		usleep(100);
 		byte--;
 	}
 }
@@ -94,11 +80,9 @@ void	byte_printer(int PID, char *text)
 			encoded = (text[i] >> byte) & 1;
 			if (encoded == 0)
 				kill(PID, SIGUSR1);
-			if (encoded == 1)
+			else if (encoded == 1)
 				kill(PID, SIGUSR2);
-			confirmation();
 			pause();
-			usleep(100);
 			byte--;
 		}
 		i++;
@@ -111,10 +95,19 @@ int	main(int argc, char **argv)
 {
 	int PID;
 	int i;
+	struct sigaction	ear;
 
+	if (argc != 3)
+		return (1);
 	i = 0;
-	(void)argc;
+	sigemptyset(&ear.sa_mask);
+	ear.sa_handler = listener;
+	ear.sa_flags = SA_RESTART;
+	sigaction(SIGUSR1, &ear, NULL);
+	sigaction(SIGUSR2, &ear, NULL);
 	PID = ft_atoi(argv[1]);
+	if (PID < 0 || kill(PID,0) == -1)
+		return (1);
 	byte_printer(PID, argv[2]);
 	return (0);
 }
