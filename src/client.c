@@ -6,11 +6,13 @@
 /*   By: obajja <obajja@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:58:53 by obajja            #+#    #+#             */
-/*   Updated: 2025/03/12 22:02:14 by obajja           ###   ########.fr       */
+/*   Updated: 2025/03/12 23:31:11 by obajja           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minitalk.h>
+
+int g_ok = 0;
 
 int	ft_atoi(const char *str)
 {
@@ -41,8 +43,10 @@ int	ft_atoi(const char *str)
 
 void	listener(int sig)
 {
-	if (sig == SIGUSR2)
-		exit(1);
+	if (sig == SIGUSR1)
+		g_ok = 1;
+	else
+		exit (0);
 }
 
 void	end_printer(int PID)
@@ -55,12 +59,14 @@ void	end_printer(int PID)
 	byte = 7;
 	while (byte >= 0)
 	{
+		g_ok = 0;
 		encoded = (text >> byte) & 1;
 		if (encoded == 0)
 			kill(PID, SIGUSR1);
 		if (encoded == 1)
 			kill(PID, SIGUSR2);
-		pause();
+		while (!g_ok)
+			pause();
 		byte--;
 	}
 }
@@ -77,13 +83,17 @@ void	byte_printer(int PID, char *text)
 		byte = 7;
 		while (byte >= 0)
 		{
+			g_ok = 0;
 			encoded = (text[i] >> byte) & 1;
 			if (encoded == 0)
 				kill(PID, SIGUSR1);
 			else if (encoded == 1)
 				kill(PID, SIGUSR2);
-			pause();
 			byte--;
+			while (!g_ok)
+			{
+				pause();
+			}
 		}
 		i++;
 	}

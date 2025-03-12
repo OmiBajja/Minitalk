@@ -6,7 +6,7 @@
 /*   By: obajja <obajja@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:58:58 by obajja            #+#    #+#             */
-/*   Updated: 2025/03/12 22:47:19 by obajja           ###   ########.fr       */
+/*   Updated: 2025/03/12 23:32:43 by obajja           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,11 @@ void	byte_aggregator(int sig, siginfo_t *info, void *txt)
 {
 	static char	byte = 0;
 	static int	count = 0;
+	static int	pid = 0;
 
 	(void)txt;
+	if (pid == 0)
+		pid = info->si_pid;
 	if (!str)
 		str = ft_calloc(2,1);
 	byte <<= 1;
@@ -55,15 +58,14 @@ void	byte_aggregator(int sig, siginfo_t *info, void *txt)
 			count = 0;
 			free(str);
 			str = NULL;
-			usleep(100);
-			kill(info->si_pid, SIGUSR2);
+			kill(pid, SIGUSR2);
+			pid = 0;
 			return ;
 		}
 		byte = 0;
 		count = 0;
 	}
-	usleep(100);
-	kill(info->si_pid, SIGUSR1);
+	kill(pid, SIGUSR1);
 }
 
 void	listening(void)
@@ -75,14 +77,13 @@ void	listening(void)
 	ear.sa_flags = SA_RESTART | SA_SIGINFO;
 	sigaction(SIGUSR1, &ear, NULL);
 	sigaction(SIGUSR2, &ear, NULL);
-	while (1)
-		pause();
-	return ;
 }
 
 int	main(void)
 {
 	ft_printf("PID: %d\n", getpid());
 	listening();
+	while (1)
+		pause();
 	return (0);
 }
