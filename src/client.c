@@ -6,7 +6,7 @@
 /*   By: obajja <obajja@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 10:58:53 by obajja            #+#    #+#             */
-/*   Updated: 2025/03/12 23:53:23 by obajja           ###   ########.fr       */
+/*   Updated: 2025/03/13 10:29:15 by obajja           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,12 @@ int	main(int argc, char **argv)
 	ear.sa_flags = SA_RESTART;
 	sigaction(SIGUSR1, &ear, NULL);
 	sigaction(SIGUSR2, &ear, NULL);
+	while (argv[1][i])
+	{	
+		if (!ft_isdigit(argv[1][i]))
+			return (1);
+		i++;
+	}
 	pid = ft_atoi(argv[1]);
 	if (pid < 0 || kill(pid, 0) == -1)
 		return (1);
